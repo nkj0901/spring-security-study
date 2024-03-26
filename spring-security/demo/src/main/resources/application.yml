@@ -1,0 +1,13 @@
+jwt :
+#  서명에 사용할 시크릿 키 값. HS512 알고리즘을 사용하기 때문에 Secret Key는 64Byte 이상 되어야 한다.
+#  직접 값을 이렇게 쓰는 것은 매우 위험 참조하도록 만들자.
+  secret: c3ByaW5nYm9vdC1qd3QtdHV0b3JpYWwtc3ByaW5nYm9vdC1qd3QtdHV0b3JpYWwtc3ByaW5nYm9vdC1qd3QtdHV0b3JpYWwK
+  refresh-token-validity-in-seconds: 1209600 # 14일
+  access-token-validation-in-seconds: 43200 # 12시간
+
+#Redis Cache
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379

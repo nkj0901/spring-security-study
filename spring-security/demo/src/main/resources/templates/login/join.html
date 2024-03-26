@@ -1,0 +1,24 @@
+<!doctype html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<h2>회원가입 화면 </h2>
+<form class="form-signin" method="post" action="/login/join">
+
+    <span><input type="text" id="username" name="username" class="form-control" placeholder="아이디" autofocus="" /></span>
+    <br><br>
+    <input type="text" id="password" name="password" class="form-control" placeholder="비밀번호" />
+
+    <br><br><br>
+    <div style="text-align: center">
+        <input id="joinBtn" style="display :inline-block;"type="submit" class="btn btn-info active" value="회원가입" />
+    </div>
+</form>
+</body>
+</html>

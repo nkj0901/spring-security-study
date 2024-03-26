@@ -1,0 +1,25 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<form th:action="@{/members/sign-in}" method="post">
+    <h1>Please sign in</h1>
+    <label for="username" >User name</label>
+    <input type="text" name="username" id="username" placeholder="User name" required autofocus>
+    <label for="inputPassword" >Password</label>
+    <input type="password" name="password" id="inputPassword" placeholder="Password" required>
+    <div>
+        <label>
+            <input type="checkbox" value="remember-me"> Remember me
+        </label>
+    </div>
+    <button type="submit">Sign in</button>
+</form>
+</body>
+</html>
