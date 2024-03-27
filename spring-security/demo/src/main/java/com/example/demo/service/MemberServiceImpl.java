@@ -1,8 +1,11 @@
 package com.example.demo.service;
 
+import com.example.demo.User.Member;
 import com.example.demo.User.MemberRepository;
 import com.example.demo.dto.JwtToken;
 import com.example.demo.util.JwtTokenProvider;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,12 +18,13 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class MemberServiceImpl {
-
-    private final MemberRepository memberRespotory;
+public class MemberServiceImpl implements MemberService{
+    private final MemberRepository memberRepotory;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final RedisService redisService;
 
+    @Override
     public JwtToken signIn(String username, String password) {
         //1.username + password를 기반으로 Authentication 객체 생성
         //이때 authentication은 인증 여부를 확인하는 authenticated 값이 false
@@ -34,5 +38,39 @@ public class MemberServiceImpl {
         JwtToken jwtToken = jwtTokenProvider.createToken(authentication);
 
         return jwtToken;
+    }
+
+    @Override
+    public JwtToken reissue(String encryptedRefreshToken) {
+        verifiedRefreshToken(encryptedRefreshToken);
+        Claims claims = jwtTokenProvider.parseClaims(encryptedRefreshToken);
+        String name = claims.getSubject();
+        String redisRefreshToken = redisService.getValues(name);
+
+        if(redisService.checkExistsValue(redisRefreshToken) && encryptedRefreshToken.equals(redisRefreshToken)){
+            Member findMember = this.findMemberByName(name);
+
+            return null;
+
+        } else {
+            log.info("refresh token 토큰 일치하지 않음");
+            return null;
+        }
+    }
+
+    private void verifiedRefreshToken(String encryptedRefreshToken) {
+        if(encryptedRefreshToken == null) {
+            log.info("encryptedRefreshToken이 없습니다.");
+        }
+    }
+
+    private Member findMemberByName(String name) {
+        return memberRepotory.findByUsername(name).orElseThrow(() ->{
+            try {
+                throw new Exception();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }

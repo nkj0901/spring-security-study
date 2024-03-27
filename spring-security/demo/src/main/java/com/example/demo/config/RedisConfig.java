@@ -9,7 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
 @Configuration
-@EnableRedisRepositories //Redis에 대한 CRUD를 수행해야 한다면 넣어줘야 한다.
+//@EnableRedisRepositories //Redis에 대한 CRUD를 수행해야 한다면 넣어줘야 한다.
 public class RedisConfig {
 
     @Value("${spring.data.redis.host}")
