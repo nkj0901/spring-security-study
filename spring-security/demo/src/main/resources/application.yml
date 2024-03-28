@@ -3,8 +3,8 @@ jwt :
 #  직접 값을 이렇게 쓰는 것은 매우 위험 참조하도록 만들자.
   secret: c3ByaW5nYm9vdC1qd3QtdHV0b3JpYWwtc3ByaW5nYm9vdC1qd3QtdHV0b3JpYWwtc3ByaW5nYm9vdC1qd3QtdHV0b3JpYWwK
 #  초단위
-  refresh-token-validity-in-seconds: 1209600 # 14일
-  access-token-validation-in-seconds: 10 # 12시간
+  refresh-token-validity-in-seconds: 12091209600600 # 14일
+  access-token-validation-in-seconds: 100120960000000 # 2분정돈데..?
 
 #Redis Cache
 spring:

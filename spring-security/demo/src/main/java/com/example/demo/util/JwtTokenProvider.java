@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,15 +44,18 @@ public class JwtTokenProvider implements InitializingBean {
     private static final String REFRESH_HEADER = "Refresh";
     private static final String AUTHORITIES_KEY = "role";
 
+    @Getter
     @Value("${jwt.secret}")
-    private String secret;
+    public String secret;
 
+    @Getter
     @Value("${jwt.access-token-validation-in-seconds}")
-    private long accessTokenExpTime;
+    public long accessTokenExpTime;
 
+    @Getter
     @Value("${jwt.refresh-token-validity-in-seconds}")
-    private long refreshTokenExpTime;
-    private Key key;
+    public long refreshTokenExpTime;
+    public Key key;
 
 
     @Override
@@ -60,15 +64,15 @@ public class JwtTokenProvider implements InitializingBean {
         //base64로 인코딩된 시크릿 값을 디코딩하여 바이트 배열로 변환
         //jwt 시크립 값은 일반적으로 Base64되어 있어 보통 디코딩하여 바이트 배열로 변환하는 과정이 필요하다.
         byte[] keyBytes = Decoders.BASE64.decode(secret);
-        //시크리 값을 HMAC_SHA 알고리즘에 사용할 수 있는 비밀 키로 변환
+        //시크릿 값을 HMAC_SHA 알고리즘에 사용할 수 있는 비밀 키로 변환
         //HMAC-SHA 알고리즘은 JWT 서명(signature)을 생성하거나 검증하는데 사용된다.
         //따라서 jwt의 시크릿 값을 이용하여 HMAC-SHA에 사용할 수 있는 키로 변화하는 과정이 필요하다.
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     //Authentication 객체를 받아서 토큰 생성, 반환
-    public JwtToken createToken(Authentication authentication) {
-        String authorities = authentication.getAuthorities().stream()
+    public JwtToken createToken(UserDetails userDetails) {
+        String authorities = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
@@ -80,7 +84,7 @@ public class JwtTokenProvider implements InitializingBean {
         //jwt 토큰 생성, 리턴
         String accessToken =  Jwts.builder()
                 .claim(AUTHORITIES_KEY, authorities)
-                .setSubject(authentication.getName())
+                .setSubject(userDetails.getUsername())
                 .signWith(key, SignatureAlgorithm.HS512)
                 .setExpiration(accessTokenExpiresIn)
                 .compact();
@@ -92,7 +96,7 @@ public class JwtTokenProvider implements InitializingBean {
         // signWith() :  서명을 위한 Key(java.security.Key) 객체를 설정한다.
         // compact() : jwt를 생성하고 직렬화한다.
         String refreshToken = Jwts.builder()
-                .setSubject(authentication.getName())
+                .setSubject(userDetails.getUsername())
                 .setExpiration(refreshTokenExpiresIn)
                 //민감한게 아니라서 HS256 생략
                 .signWith(key)
@@ -184,6 +188,7 @@ public class JwtTokenProvider implements InitializingBean {
     public String resolveRefreshToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(REFRESH_HEADER);
         if(StringUtils.hasText(bearerToken)) return bearerToken;
+        else log.info("refresh 토큰이 없음");
         return null;
     }
 

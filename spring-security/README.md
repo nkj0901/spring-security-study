@@ -3,7 +3,8 @@
 #### 인증, 권한 부여 및 일반적인 공격에 대한 보호를 제공하는 프레임워크.
 
 스프링 시큐리티 시작하기 https://docs.spring.io/spring-security/reference/servlet/getting-started.html
-   
+여러 자료를 참고 했지만, 주로 https://green-bin.tistory.com/68 을 보고 따라함
+
 ### 인증과 인가
 - 인증 : 해당 사용자가 본인이 맞는지 확인하는 과정
 - 인가 : 해당 사용자가 요청하는 자원을 실행할 수 있는 권한이 있는가를 확인하는 과정
@@ -13,7 +14,7 @@
 Credential(비밀번호)을 비밀번호로 사용하는 Credential 기반의 인증방식을 사용한다.
 
 <img src="demo/src/main/resources/img/securityimg.png">
-'인증'과 '권한'에 대한 부분을필터(Filter) 흐름에 따라 처리한다. 
+'인증'과 '권한'에 대한 부분을 필터(Filter) 흐름에 따라 처리한다. 
 요청이 들어오면, 인증과 권한을위한 필터들을 통하게 된다. 
 유저가 인증을 요청할 때 필터는 인증 메커니즘과 모델을기반으로 한 필터들을 통과한다.
 
@@ -35,6 +36,21 @@ Interceptor는 Dispatcher와 Controller 사이에 위치한다는 점에서 적�
 8. 인증이 완료되면 권한 등의 사용자 정보를담은 Authentication 객체를 반환한다.
 9. 다시 최초의 AuthenticationFilter에 Authentication 객체가 반환된다.
 10. Authentication 객체는 SecurityContext에 저장된다.
+
+### SecurityContext
+Authentication 객체가 저장되는 보관이며, 언제든지 Authentication 객체를 꺼내어 사용할 수 있도록 제공되는 클래스이다.
+TreadLocal에 저장되어 전역적으로 참조가 가능하다. TreadLocal이기 때문에 Thread마다 할당된 고유 공간이어서 다른 Tread와 공유되지 않는다.
+get. set, remove api를 지원한다. 전역적으로 참조가 가능하기 때문에 set한 이후 전역적으로 get할 수 있다.
+
+### SecurityContextHolder
+SecurityContext 객체를 저장하는 wrapper 클래스이다.
+```java
+SecurityContextHolder.getContext().setAuthentication(authentication) : Authentication 객체를 저장
+SecurityContextHolder.clearContext(): 기본 정보를 초기화
+SecurityContextHolder.getContext().getAuthentication() : Authentication 객체를 조회
+
+```
+
 
 ### Security Filter Chain
 <img src="demo/src/main/resources/img/filterchainimg.png">   
@@ -77,16 +93,6 @@ HTTP 리소스의 보안 처리를 수행한다. 사용자가 요청한 request�
 > 다른 것들 중에 이것을 기본 Filter Chain으로 설정한다. (@Bean으로 등록해줌)
 모든 요청에 대해 이 필터를 적용함.
 
-> #### 인증 이벤트(DefaultAuthenticationEventPublisher)
->성공하거나 실패하는 각 인증에 대해 각가 AuthenticationSuccessEvent 또는 authenticationFailureEvent가 실행된다.
-이러한 이벤트를 AuthenticationEventPublisher가 수신하는데 DefaultAuthenticationEventPublisher를 반환한다.
-```java
-@Bean
-public AuthenticationEventPublisher authenticationEventPublisher
-        (ApplicationEventPublisher applicationEventPublisher) {
-    return new DefaultAuthenticationEventPublisher(applicationEventPublisher);
-}
-```
 <img src="demo/src/main/resources/img/authorizationfilter.png"> 
 
 > #### Authorize HttpServletRequests
@@ -109,14 +115,6 @@ http
 
 > #### UserDetailsService
 > UserDetailService는 DaoAuthenticationProvider에 의해 사용된다.
- 
-> #### 내가 만든 로그인 흐름
-> -> MemberController에서 signIn() 메서드를 호출    
-> -> MemberService에서 UsernamePasswordAuthenticationToken을 만들고 로그인 정보를 담아 AuthenticationManager에게 넘겨준다.   
-> -> AuthenticationManager는 UserDetailsService의 loadUserByUsername()을 실행시키고 유저 정보를 담은 UserDetails를 반환한다.   
-> -> DaoAuthenticationProvider에서 찾아온 UserDetails의 값과 UsernamePasswordAuthenticationToken의 값을 비교하여 옳은 입력인지 확인   
-> -> 유효한 유저이면 serviceImpl에 Authentication 객체를 반환한다.
-
 
 ### Logout과 RefreshToken
 이와 같은 JWT 방식은 단 한번도 데이터베이스에 저장한다거나, 조회한다거나 하는 과정이 포함되지 않는다. 
@@ -134,7 +132,7 @@ jwt토큰을 삭제하거나 무효화하는 방식으로 구현할 수 있다.
 > #### 해결 방법
 > 로그아웃 시 블랙리스트에 **Refresh Token**을 저장한다. 토큰이 탈취당해도 피해를 최소화할 수 있도록 만료 기간을 매우 짧게 설정한다.
 블랙리스트는 쉽게 말해 만료되거나 무효화(로그아웃)된 토큰을 저장하는 테이블이다.
-이 방법을 사용할 경우 프로느엔드 코드에서 직접 Access Token을 삭제해주면 된다.
+이 방법을 사용할 경우 프론트엔드 코드에서 직접 Access Token을 삭제해주면 된다.
 Access Token이 만료되어 Refresh Token으로 새로운 Access Token을 요청하는 경우에도, 
 서버는 블랙리스트에 Refresh Token이 저장되어 있는 것을 확인하고 Access Token 재발급을 거절할 수 있다.
 로그아웃 시에 Access Token도 저장한다. 탈취 당했을 때, 사용할 수 없도록 만든다.
@@ -159,9 +157,14 @@ Access Token이 만료되어 Refresh Token으로 새로운 Access Token을 요�
 ### jwt 인증과정
 <img src="demo/src/main/resources/img/jwtprocess.png">
 
+localhost:8080/login으로 요청보내기(따로 컨트롤러에 메서드 만들어줄 필요없음)
 - 사용자 로그인시 유효한 회원인지 확인
 - 사용자 정보와 권한이 들어가 있는 Access 토큰과 Refresh 토큰 발급 (이때 Refresh 토큰은 DB에 저장한다.)
 클라이언트는 두 종류의 토큰을 받는다.
+
+** 여기까지 JwtFilter(이름을 너무 대충 지음.. 수정하도록..)로 구현 이후로는 JwtVerificationFilter로 구현   
+** 만약 로그인이 되어 있는 사람이라면? Spring Security는 Header에 Authentication이 있는지 없는지에 따라서    
+** 로그인 필터 사용 여부를 판단한다.
 - 이후 사용자가 데이터를 요청할 때마다 Access 토큰을 동봉하여 보낸다.
 - 서버는 사용자로부터 전달된 Access 토큰이 유효한지만 판단한다(어자피 사용자의 권한과 정보는 토큰에 자체적으로 있다.)
 - Access 토큰이 유효하면 사용자의 요청을 처리해서 반환해준다.
@@ -172,6 +175,13 @@ Access Token이 만료되어 Refresh Token으로 새로운 Access Token을 요�
 - 전달받은 Refresh 토큰이 그 자체로 유효한지 확인하고, 3번에서 DB에 저장해 두었던 원본 Refresh 토큰과도 비교하여 같은지 확인한다.
 - 유효한 Refresh 토큰이면 Access 토큰을 재발급 해준다.
 - 만약 Refresh 토큰도 만료됐다면 로그인을 다시하고 Access 토큰과 Refresh 토큰을 새로 발급해준다.
+
+** 로그아웃
+- 클라이언트에서 서버로 사용자의 logout을 요청한다.
+- 서버는 요청 헤더에 담긴 토큰을 검증한다.
+- 검증이 되면 Redis에 저장되어 있던 username(key)과 Refresh Token(value)을 삭제한다.
+- AccessToken을 key "logout" 문자열을 value로 Redis에 저장하여 해당 토큰을 Black List 처리한다.
+- 사용자가 로그아웃 처리한 jwt로 요청을 보낼 경우 검증 로직을 통해 로그아웃한 사용자라면 인증 처리를 거부한다.
 
 출처: https://llshl.tistory.com/32 [프로찍먹러:티스토리]
 

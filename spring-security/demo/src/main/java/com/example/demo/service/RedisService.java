@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -14,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 /*
 * 참고 https://green-bin.tistory.com/69?category=1116728
 * */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RedisService {
@@ -27,6 +29,7 @@ public class RedisService {
     public void setValues(String key, String data, Duration duration) {
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
         values.set(key, data, duration);
+        log.info("redis에 value 저장 완료");
     }
 
     @Transactional

@@ -35,11 +35,11 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final RedisService redisService;
+    private final JwtTokenProvider jwtTokenProvider;
 
 
     //토큰 헤더에 입력시 설정한 key 값
     public static final String AUTHORIZATION_HEADER = "Authorization";
-    private JwtTokenProvider jwtTokenProvider;
 
     /*
     attemptAuthentication() : 인증을 시도하는 메서드.
@@ -50,6 +50,7 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
     @SneakyThrows
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        log.info("지금 attemptAuthentication 실행중");
         //ServletInputStream을 LoginDto 객체로 역직렬화
         ObjectMapper objectMapper = new ObjectMapper();
         LoginDto loginDto = objectMapper.readValue(request.getInputStream(), LoginDto.class);
@@ -67,7 +68,9 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
     */
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
-        JwtToken jwtToken = jwtTokenProvider.createToken(authentication);
+        log.info("지금 successfulAuthentication 실행중");
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        JwtToken jwtToken = jwtTokenProvider.createToken(userDetails);
         jwtTokenProvider.accessTokenSetHeader(jwtToken.getAccessToken(), response);
         jwtTokenProvider.refreshTokenSetHeader(jwtToken.getRefreshToken(), response);
 
