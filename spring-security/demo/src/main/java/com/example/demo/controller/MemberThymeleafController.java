@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
-public class MainController {
+public class MemberThymeleafController {
 
     private final MemberRepository memberRepository;
 

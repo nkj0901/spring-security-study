@@ -41,10 +41,10 @@ public class SecurityConfig  {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(AbstractHttpConfigurer::disable)
                 //참고 코드 https://velog.io/@goat_hoon/Spring-Security%EB%A5%BC-%ED%99%9C%EC%9A%A9%ED%95%9C-JWT-%EB%8F%84%EC%9E%85%EA%B8%B0
-//                .formLogin((formLogin) -> formLogin
-//                        .loginPage("/login").defaultSuccessUrl("/", true))
+                .formLogin((formLogin) -> formLogin
+                        .loginPage("/login").defaultSuccessUrl("/", true))
                 .authorizeHttpRequests((authorizeRequests) -> authorizeRequests
-                        .requestMatchers("/", "login/**","/members/sign-in", "/members/reissue","img/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/", "login/**","/members/sign-in", "/members/reissue","img/**", "/favicon.ico", "/error/**").permitAll()
                         .requestMatchers("/api1").hasRole("user")
                         .requestMatchers("/api2").hasRole("admin")
                         .requestMatchers("/user/**").hasRole("user")

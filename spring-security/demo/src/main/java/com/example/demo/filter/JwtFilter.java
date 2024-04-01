@@ -37,7 +37,6 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
     private final RedisService redisService;
     private final JwtTokenProvider jwtTokenProvider;
 
-
     //토큰 헤더에 입력시 설정한 key 값
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
@@ -51,11 +50,11 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         log.info("지금 attemptAuthentication 실행중");
-        //ServletInputStream을 LoginDto 객체로 역직렬화
+//        ServletInputStream을 LoginDto 객체로 역직렬화
         ObjectMapper objectMapper = new ObjectMapper();
         LoginDto loginDto = objectMapper.readValue(request.getInputStream(), LoginDto.class);
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
+                new UsernamePasswordAuthenticationToken(request.getParameter("username"), request.getParameter("password"));
 // login 메소드의 Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken); '
 // 인증 부분에서 암호화된 비밀번호와 사용자 입력 비밀번호의 비교가 가능하게 됩니다.
         return authenticationManagerBuilder.getObject().authenticate(authenticationToken);

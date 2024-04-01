@@ -30,7 +30,8 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             List.of("/"
                 , "/h2"
                 , "/members/sign-in"
-                , "/member/reissue");
+                , "/member/reissue"
+                , "/favicon.ico");
 
     //인증에서
     private final JwtTokenProvider jwtTokenProvider;
@@ -39,7 +40,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     // JWT 인증 정보를 현재 쓰레드의 SecurityContext에 저장(가입/로그인/재발급 Request 제외)
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("지금 JwtVerificationFilter 실행중");
+        log.info("지금 JwtVerificationFilter 실행중 {}", request.getRequestURI());
         String accessToken = jwtTokenProvider.resolveAccessToken(request);
         if(StringUtils.hasText(accessToken) && doNotLogout(accessToken) &&
         jwtTokenProvider.validateToken(accessToken)) {
